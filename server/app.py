@@ -110,13 +110,13 @@ def recommend_product():
     try:
         product_data_df = pd.DataFrame(product_data)
         product_data_df['combined'] = product_data_df.apply(
-            lambda row: "{}, {}, {}".format(row['brand'], row['prod'], row['description']), axis=1)
+            lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
         product_data_df['text_embedding'] = product_data_df.combined.apply(
             lambda x: get_embedding(x, engine='text-embedding-ada-002'))
 
         customer_order_df = pd.DataFrame(customer_order_data)
         customer_order_df['combined'] = customer_order_df.apply(
-            lambda row: "{}, {}, {}".format(row['brand'], row['prod'], row['description']), axis=1)
+            lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
         customer_order_df['text_embedding'] = customer_order_df.combined.apply(
             lambda x: get_embedding(x, engine='text-embedding-ada-002'))
 
@@ -148,9 +148,9 @@ def recommend_product():
             Role.system.name, "Hey there. I'm your shopping co-pilot. What can I help you find today? Please tell me what you're looking for?")
         append_message_objects(Role.user.name, customer_input)
         prev_purchases = ". ".join(
-            ["{}".format(row['combined']) for index, row in top_3_purchases_df.iterrows()])
+            [f"{row['combined']}" for index, row in top_3_purchases_df.iterrows()])
         append_message_objects(
-            Role.user.name, "Here're my latest product orders: {}".format(prev_purchases))
+            Role.user.name, f"Here're my latest product orders: {prev_purchases}")
         append_message_objects(
             Role.user.name, "Please give me a detailed explanation of your recommendations")
         append_message_objects(
@@ -160,7 +160,7 @@ def recommend_product():
         products_list = []
         for index, row in top_3_products_df.iterrows():
             brand_dict = {'role': Role.assistant.name,
-                          "content": "{}".format(row['combined'])}
+                          "content": f"{row['combined']}"}
             products_list.append(brand_dict)
 
         message_objects.extend(products_list)
