@@ -99,7 +99,7 @@ def home():
 
 
 @app.route("/recommend-product", methods=["POST"])
-def generate_text():
+def recommend_product():
     data = request.get_json()
     # customer_input = data.get("customer_input")
     customer_input = "Hi! Can you recommend a good moisturizer for me?"
@@ -120,7 +120,6 @@ def generate_text():
         customer_order_df['text_embedding'] = customer_order_df.combined.apply(
             lambda x: get_embedding(x, engine='text-embedding-ada-002'))
 
-        customer_input = "Hi! Can you recommend a good moisturizer for me?"
         response = openai.Embedding.create(
             input=customer_input,
             model="text-embedding-ada-002"
