@@ -104,19 +104,19 @@ def generate_text():
     # customer_input = data.get("customer_input")
     customer_input = "Hi! Can you recommend a good moisturizer for me?"
 
-    if not prompt:
+    if not customer_input:
         return jsonify({"error": "Please provide a prompt"}), 400
 
     try:
         product_data_df = pd.DataFrame(product_data)
         product_data_df['combined'] = product_data_df.apply(
-            lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
+            lambda row: "{}, {}, {}".format(row['brand'], row['prod'], row['description']), axis=1)
         product_data_df['text_embedding'] = product_data_df.combined.apply(
             lambda x: get_embedding(x, engine='text-embedding-ada-002'))
 
         customer_order_df = pd.DataFrame(customer_order_data)
         customer_order_df['combined'] = customer_order_df.apply(
-            lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
+            lambda row: "{}, {}, {}".format(row['brand'], row['prod'], row['description']), axis=1)
         customer_order_df['text_embedding'] = customer_order_df.combined.apply(
             lambda x: get_embedding(x, engine='text-embedding-ada-002'))
 
@@ -149,9 +149,9 @@ def generate_text():
             Role.system.name, "Hey there. I'm your shopping co-pilot. What can I help you find today? Please tell me what you're looking for?")
         append_message_objects(Role.user.name, customer_input)
         prev_purchases = ". ".join(
-            [f"{row['combined']}" for index, row in top_3_purchases_df.iterrows()])
+            ["{}".format(row['combined']) for index, row in top_3_purchases_df.iterrows()])
         append_message_objects(
-            Role.user.name, f"Here're my latest product orders: {prev_purchases}")
+            Role.user.name, "Here're my latest product orders: {}".format(prev_purchases))
         append_message_objects(
             Role.user.name, "Please give me a detailed explanation of your recommendations")
         append_message_objects(
@@ -161,7 +161,7 @@ def generate_text():
         products_list = []
         for index, row in top_3_products_df.iterrows():
             brand_dict = {'role': Role.assistant.name,
-                          "content": f"{row['combined']}"}
+                          "content": "{}".format(row['combined'])}
             products_list.append(brand_dict)
 
         message_objects.extend(products_list)
@@ -176,7 +176,3 @@ def generate_text():
         return jsonify({"generated_text": generated_text, "recommend_products": top_3_products_df.to_json(orient="records")})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
