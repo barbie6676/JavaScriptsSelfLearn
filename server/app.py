@@ -176,3 +176,7 @@ def generate_text():
         return jsonify({"generated_text": generated_text, "recommend_products": top_3_products_df.to_json(orient="records")})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
