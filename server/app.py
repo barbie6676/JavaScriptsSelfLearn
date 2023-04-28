@@ -32,6 +32,15 @@ def create_embedding_with_backoff(**kwargs):
     return openai.Embedding.create(**kwargs)
 
 
+attribute_keys = [
+    "prod_id",
+    "prod",
+    "brand",
+    "description",
+    "url",
+    "image_url"
+]
+
 product_data = [{
     "prod_id": 1,
     "prod": "moisturizer",
@@ -113,8 +122,8 @@ def home():
 @app.route("/recommend-product", methods=["POST"])
 def recommend_product():
     data = request.get_json()
-    # customer_input = data.get("customer_input")
-    customer_input = "Hi! Can you recommend a good moisturizer for me?"
+    # example: "Hi! Can you recommend a good moisturizer for me?"
+    customer_input = data.get("customer_input")
 
     if not customer_input:
         return jsonify({"error": "Please provide a prompt"}), 400
@@ -168,7 +177,7 @@ def recommend_product():
             messages=message_objects
         )
         generated_text = response.choices[0].message['content'].strip()
-        return jsonify({"text": generated_text, "recommend_products": top_3_products_df.to_json(orient="records")})
+        return jsonify({"text": generated_text, "recommend_products": top_3_products_df[attribute_keys].to_json(orient="records")})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
