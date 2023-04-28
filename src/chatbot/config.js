@@ -7,7 +7,7 @@ import Quiz from "../components/Quiz/Quiz";
 const config = {
   botName: "StyleBot",
   initialMessages: [
-    createChatBotMessage(`Hello. What do you want to learn`, {
+    createChatBotMessage(`Hey there. I'm your shopping co-pilot. What can I help you find today? Please tell me what you're looking for?`, {
       widget: "options",
     }),
   ],
