@@ -3,8 +3,7 @@ from flask import Flask, jsonify, request
 from openai.embeddings_utils import get_embedding, cosine_similarity
 import pandas as pd
 from enum import Enum
-import random
-import time
+import backoff
 
 
 class Role(Enum):
@@ -17,69 +16,18 @@ app = Flask(__name__)
 
 openai.api_key = "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"
 
-# define a retry decorator
 
-
-def retry_with_exponential_backoff(
-    func,
-    initial_delay: float = 1,
-    exponential_base: float = 2,
-    jitter: bool = True,
-    max_retries: int = 10,
-    errors: tuple = (openai.error.RateLimitError,),
-):
-    """Retry a function with exponential backoff."""
-
-    def wrapper(*args, **kwargs):
-        # Initialize variables
-        num_retries = 0
-        delay = initial_delay
-
-        # Loop until a successful response or max_retries is hit or an exception is raised
-        while True:
-            try:
-                return func(*args, **kwargs)
-
-            # Retry on specified errors
-            except errors as e:
-                # Increment retries
-                num_retries += 1
-
-                # Check if max retries has been reached
-                if num_retries > max_retries:
-                    raise Exception(
-                        f"Maximum number of retries ({max_retries}) exceeded."
-                    )
-
-                # Increment the delay
-                delay *= exponential_base * (1 + jitter * random.random())
-
-                # Sleep for the delay
-                time.sleep(delay)
-
-            # Raise exceptions for any errors not specified
-            except Exception as e:
-                raise e
-
-    return wrapper
-
-
-@retry_with_exponential_backoff
+@backoff.on_exception(backoff.expo, openai.error.RateLimitError)
 def chat_completion_with_backoff(**kwargs):
     return openai.ChatCompletion.create(**kwargs)
 
 
-@retry_with_exponential_backoff
+@backoff.on_exception(backoff.expo, openai.error.RateLimitError)
 def get_embedding_with_backoff(**kwargs):
     return get_embedding(**kwargs)
 
 
-@retry_with_exponential_backoff
-def cosine_similarity_with_backoff(**kwargs):
-    return cosine_similarity(**kwargs)
-
-
-@retry_with_exponential_backoff
+@backoff.on_exception(backoff.expo, openai.error.RateLimitError)
 def create_embedding_with_backoff(**kwargs):
     return openai.Embedding.create(**kwargs)
 
@@ -156,21 +104,6 @@ product_data = [{
     "image_url": "https://www.sephora.com/productimages/sku/s2230829-main-zoom.jpg?imwidth=315"
 }]
 
-# TODO: assume we always don't have customer order data
-customer_order_data = []
-
-product_data_df = pd.DataFrame(product_data)
-product_data_df['combined'] = product_data_df.apply(
-    lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
-product_data_df['text_embedding'] = product_data_df.combined.apply(
-    lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
-
-customer_order_df = pd.DataFrame(customer_order_data)
-customer_order_df['combined'] = customer_order_df.apply(
-    lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
-customer_order_df['text_embedding'] = customer_order_df.combined.apply(
-    lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
-
 
 @app.route("/", methods=["GET"])
 def home():
@@ -187,23 +120,23 @@ def recommend_product():
         return jsonify({"error": "Please provide a prompt"}), 400
 
     try:
+        product_data_df = pd.DataFrame(product_data)
+        product_data_df['combined'] = product_data_df.apply(
+            lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
+        product_data_df['text_embedding'] = product_data_df.combined.apply(
+            lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
+
         response = create_embedding_with_backoff(
             input=customer_input,
             model="text-embedding-ada-002"
         )
         embeddings_customer_question = response['data'][0]['embedding']
 
-        customer_order_df['search_purchase_history'] = customer_order_df.text_embedding.apply(
-            lambda x: cosine_similarity_with_backoff(x, embeddings_customer_question))
-        customer_order_df = customer_order_df.sort_values(
-            'search_purchase_history', ascending=False)
-
         product_data_df['search_products'] = product_data_df.text_embedding.apply(
-            lambda x: cosine_similarity_with_backoff(x, embeddings_customer_question))
+            lambda x: cosine_similarity(x, embeddings_customer_question))
         product_data_df = product_data_df.sort_values(
             'search_products', ascending=False)
 
-        top_3_purchases_df = customer_order_df.head(3)
         top_3_products_df = product_data_df.head(3)
 
         message_objects = []
@@ -214,10 +147,6 @@ def recommend_product():
         append_message_objects(
             Role.system.name, "Hey there. I'm your shopping co-pilot. What can I help you find today? Please tell me what you're looking for?")
         append_message_objects(Role.user.name, customer_input)
-        prev_purchases = ". ".join(
-            [f"{row['combined']}" for index, row in top_3_purchases_df.iterrows()])
-        append_message_objects(
-            Role.user.name, f"Here're my latest product orders: {prev_purchases}")
         append_message_objects(
             Role.user.name, "Please give me a detailed explanation of your recommendations")
         append_message_objects(
