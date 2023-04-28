@@ -168,7 +168,7 @@ def recommend_product():
             messages=message_objects
         )
         generated_text = response.choices[0].message['content'].strip()
-        return jsonify({"generated_text": generated_text, "recommend_products": top_3_products_df.to_json(orient="records")})
+        return jsonify({"text": generated_text, "recommend_products": top_3_products_df.to_json(orient="records")})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
