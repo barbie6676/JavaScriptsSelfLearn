@@ -4,20 +4,16 @@ class ActionProvider {
     this.setState = setStateFunc;
   }
 
-  greet = () => {
-    const message = this.createChatBotMessage("Hello friend.");
-    this.addMessageToState(message);
-  };
-
-  handleJavascriptQuiz = () => {
-    const message = this.createChatBotMessage(
-      "Fantastic. Here is your quiz. Good luck!",
+  handleGenerateResponse = (message) => {
+    // TODO
+    // console.log(message);
+    const botMessage = this.createChatBotMessage(
+      "Hello friend.",
       {
-        widget: "javascriptQuiz",
+        widget: "options",
       }
     );
-
-    this.addMessageToState(message);
+    this.addMessageToState(botMessage);
   };
 
   addMessageToState = (message) => {
