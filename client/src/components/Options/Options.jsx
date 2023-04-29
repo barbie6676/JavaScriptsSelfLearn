@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import "./Options.css";
+import ProductCard from "./ProductCard";
 
 const Options = (props) => {
   const [userMessage, setUserMessage] = useState(undefined);
@@ -9,6 +10,9 @@ const Options = (props) => {
 
   useEffect(() => {
     const domNode = myRef.current.previousSibling;
+    if (domNode === undefined || domNode === null) {
+      return;
+    }
     const reactInternalInstanceKey = Object.keys(domNode).find(key => key.startsWith('__reactInternalInstance'));
     const reactInternalInstance = domNode[reactInternalInstanceKey];
     const memoizedProps = reactInternalInstance.memoizedProps.children[0]._owner.memoizedProps;
@@ -35,7 +39,17 @@ const Options = (props) => {
     </button>
   ));
 
-  return <div className="options-container" ref={myRef}>{buttonsMarkup}</div>;
+  console.log(products);
+  const productCards = products.map((product) => (
+    <ProductCard key={product.prod_id} {...product} />
+  ));
+
+  return (
+    <div className="results-container" ref={myRef}>
+      <div className="products-container">{productCards}</div>
+      <div className="options-container">{buttonsMarkup}</div>
+    </div>
+  );
 };
 
 export default Options;

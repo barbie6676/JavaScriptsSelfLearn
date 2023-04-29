@@ -6,3 +6,11 @@
   justify-content: center;
   align-items: center;
 }
+
+.react-chatbot-kit-chat-container {
+  width: 800px;
+}
+
+.react-chatbot-kit-chat-bot-message {
+  width: 100%;
+}

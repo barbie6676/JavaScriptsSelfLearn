@@ -16,7 +16,6 @@ export const getRecommendProducts = async (customerInput) => {
         const res = await axiosInstance.post(`recommend-product`, {
             'customer_input': customerInput
         });
-        console.log(res.data);
         return res.data;
     } catch (ex) {
         console.error('failed to get recommended product');
