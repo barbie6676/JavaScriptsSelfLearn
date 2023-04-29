@@ -1,5 +1,6 @@
 import openai
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from openai.embeddings_utils import get_embedding, cosine_similarity
 import pandas as pd
 from enum import Enum
@@ -13,6 +14,7 @@ class Role(Enum):
 
 
 app = Flask(__name__)
+CORS(app)
 
 openai.api_key = "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"
 
