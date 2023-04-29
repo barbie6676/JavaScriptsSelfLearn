@@ -1,12 +1,15 @@
+import { getRecommendProducts } from "../utils/gatewayAPIs";
+
 class ActionProvider {
   constructor(createChatBotMessage, setStateFunc) {
     this.createChatBotMessage = createChatBotMessage;
     this.setState = setStateFunc;
   }
 
-  handleGenerateResponse = (message) => {
+  handleGenerateResponse = async (message) => {
+    const response = await getRecommendProducts(message);
     const botMessage = this.createChatBotMessage(
-      "Hello friend.",
+      response.text,
       {
         widget: "options",
       }
