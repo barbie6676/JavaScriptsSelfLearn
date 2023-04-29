@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import "./Options.css";
 
 const Options = (props) => {
   const [userMessage, setUserMessage] = useState(undefined);
+  const [products, setProducts] = useState([]);
+  const myRef = useRef(null);
 
   useEffect(() => {
-    const messages = props.messages;
-    const lastUserMessage = messages.findLast(message => message.type === 'user');
-    setUserMessage(lastUserMessage.message);
+    const domNode = myRef.current.previousSibling;
+    const reactInternalInstanceKey = Object.keys(domNode).find(key => key.startsWith('__reactInternalInstance'));
+    const reactInternalInstance = domNode[reactInternalInstanceKey];
+    const memoizedProps = reactInternalInstance.memoizedProps.children[0]._owner.memoizedProps;
+    setUserMessage(memoizedProps.payload.originalMessage);
+    setProducts(memoizedProps.payload.recommendProducts);
   }, []);
 
   const options = [
     { 
       text: "Regenerate", 
-      handler: () => props.actionProvider.handleGenerateResponse(userMessage), 
+      handler: () => props.actionProvider.handleGenerateResponse(userMessage, true), 
       id: 1
     },
     { 
@@ -30,7 +35,7 @@ const Options = (props) => {
     </button>
   ));
 
-  return <div className="options-container">{buttonsMarkup}</div>;
+  return <div className="options-container" ref={myRef}>{buttonsMarkup}</div>;
 };
 
 export default Options;
