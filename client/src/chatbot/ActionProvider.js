@@ -5,8 +5,6 @@ class ActionProvider {
   }
 
   handleGenerateResponse = (message) => {
-    // TODO
-    // console.log(message);
     const botMessage = this.createChatBotMessage(
       "Hello friend.",
       {

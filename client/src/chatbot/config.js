@@ -12,6 +12,9 @@ const config = {
     {
       widgetName: "options",
       widgetFunc: (props) => <Options {...props} />,
+      mapStateToProps: [
+        "messages",
+      ],
     },
   ],
 };
