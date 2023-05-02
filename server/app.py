@@ -5,7 +5,7 @@ from openai.embeddings_utils import get_embedding, cosine_similarity
 import pandas as pd
 from enum import Enum
 import backoff
-
+import time
 
 class Role(Enum):
     system = 1
@@ -115,6 +115,13 @@ product_data = [{
     "image_url": "https://www.sephora.com/productimages/sku/s2230829-main-zoom.jpg?imwidth=315"
 }]
 
+get_embedding_start_time = time.time()
+product_data_df = pd.DataFrame(product_data)
+product_data_df['combined'] = product_data_df.apply(
+    lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
+product_data_df['text_embedding'] = product_data_df.combined.apply(
+    lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
+print("get_embedding: " + str(time.time() - get_embedding_start_time))
 
 @app.route("/", methods=["GET"])
 def home():
@@ -131,22 +138,21 @@ def recommend_product():
         return jsonify({"error": "Please provide a prompt"}), 400
 
     try:
-        product_data_df = pd.DataFrame(product_data)
-        product_data_df['combined'] = product_data_df.apply(
-            lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
-        product_data_df['text_embedding'] = product_data_df.combined.apply(
-            lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
-
+        global product_data_df
+        create_embedding_start_time = time.time()
         response = create_embedding_with_backoff(
             input=customer_input,
             model="text-embedding-ada-002"
         )
         embeddings_customer_question = response['data'][0]['embedding']
+        print("create_embedding: " + str(time.time() - create_embedding_start_time))
 
+        cosine_similarity_start_time = time.time()
         product_data_df['search_products'] = product_data_df.text_embedding.apply(
             lambda x: cosine_similarity(x, embeddings_customer_question))
         product_data_df = product_data_df.sort_values(
             'search_products', ascending=False)
+        print("cosine_similarity: " + str(time.time() - cosine_similarity_start_time))
 
         top_3_products_df = product_data_df.head(3)
 
@@ -174,11 +180,13 @@ def recommend_product():
         append_message_objects(
             Role.assistant.name, "Here's my summarized recommendation of products, and why it would suit you:")
 
+        chat_completion_start_time = time.time()
         response = chat_completion_with_backoff(
             model="gpt-3.5-turbo",
             messages=message_objects
         )
         generated_text = response.choices[0].message['content'].strip()
+        print("chat_completion: " + str(time.time() - chat_completion_start_time))
         return jsonify({"text": generated_text, "recommend_products": top_3_products_df[attribute_keys].to_json(orient="records")})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
