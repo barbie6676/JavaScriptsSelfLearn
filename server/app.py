@@ -67,6 +67,9 @@ product_data_df = pd.read_csv('example.csv')
 product_data_df['text_embedding'] = product_data_df['text_embedding'].apply(
     ast.literal_eval)
 
+# hack for now
+# in-memory cache for every user session
+# we didn't clear any thing yet in-memory
 message_objects_map = {}
 
 @app.route("/recommend-product", methods=["POST"])
