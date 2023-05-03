@@ -1,0 +1,12 @@
+version: 1
+machamp:
+  production: # user can define the build name, match with the build name in build.yaml
+    branches:
+      - ^release-production$
+    post_build_actions:
+      production_postbuild: # user can define the post build action step name
+        deploy_to: eks
+        regions:
+          - aws-us-west-2
+        image_name:
+          - stylebot
