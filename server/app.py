@@ -67,23 +67,21 @@ product_data_df = pd.read_csv('example.csv')
 product_data_df['text_embedding'] = product_data_df['text_embedding'].apply(
     ast.literal_eval)
 
-
-@app.route("/", methods=["GET"])
-def home():
-    return "Welcome to the StyleBot Flask App!"
-
+message_objects_map = {}
 
 @app.route("/recommend-product", methods=["POST"])
 def recommend_product():
     data = request.get_json()
     # example: "Hi! Can you recommend a good moisturizer for me?"
     customer_input = data.get("customer_input")
+    session_id = data.get("session_id")
 
     if not customer_input:
         return jsonify({"error": "Please provide a prompt"}), 400
 
     try:
         global product_data_df
+        global message_objects_map
         create_embedding_start_time = time.time()
         response = create_embedding_with_backoff(
             input=customer_input,
@@ -103,6 +101,10 @@ def recommend_product():
         top_3_products_df = product_data_df.head(3)
 
         message_objects = []
+        if session_id:
+            if session_id not in message_objects_map:
+                message_objects_map[session_id] = []
+            message_objects = message_objects_map[session_id]
 
         def append_message_objects(role, content):
             message_objects.append({"role": role, "content": content})
