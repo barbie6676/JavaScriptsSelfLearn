@@ -4,6 +4,7 @@ import "./Options.css";
 import ProductCard from "../ProductCard/ProductCard";
 
 const Options = (props) => {
+  const sessionId = props.sessionId;
   const [userMessage, setUserMessage] = useState(undefined);
   const [products, setProducts] = useState([]);
   const myRef = useRef(null);
@@ -27,7 +28,7 @@ const Options = (props) => {
     {
       text: "Regenerate",
       handler: () =>
-        props.actionProvider.handleGenerateResponse(userMessage, true),
+        props.actionProvider.handleGenerateResponse(userMessage, sessionId, true),
       id: 1,
     },
     {

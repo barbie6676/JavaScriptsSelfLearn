@@ -1,10 +1,11 @@
 class MessageParser {
-  constructor(actionProvider) {
+  constructor(actionProvider, state) {
     this.actionProvider = actionProvider;
+    this.state = state;
   }
 
   parse(message) {
-    this.actionProvider.handleGenerateResponse(message, false);
+    this.actionProvider.handleGenerateResponse(message, this.state.sessionId, false);
   }
 }
 

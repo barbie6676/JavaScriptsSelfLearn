@@ -11,10 +11,11 @@ const axiosInstance = axios.create({
   },
 });
 
-export const getRecommendProducts = async (customerInput) => {
+export const getRecommendProducts = async (customerInput, sessionId) => {
   try {
     const res = await axiosInstance.post(`recommend-product`, {
       customer_input: customerInput,
+      session_id: sessionId,
     });
     return res.data;
   } catch (ex) {

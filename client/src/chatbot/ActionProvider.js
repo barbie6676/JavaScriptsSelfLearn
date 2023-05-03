@@ -7,12 +7,12 @@ class ActionProvider {
     this.createClientMessage = createClientMessage;
   }
 
-  handleGenerateResponse = async (message, regenerate) => {
+  handleGenerateResponse = async (message, sessionId, regenerate) => {
     if (regenerate) {
       const clientMessage = this.createClientMessage(message);
       this.addMessageToState(clientMessage);
     }
-    const response = await getRecommendProducts(message);
+    const response = await getRecommendProducts(message, sessionId);
     const botMessage = this.createChatBotMessage(response.text, {
       widget: "options",
       payload: {
