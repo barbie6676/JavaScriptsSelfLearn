@@ -13,16 +13,13 @@ class ActionProvider {
       this.addMessageToState(clientMessage);
     }
     const response = await getRecommendProducts(message);
-    const botMessage = this.createChatBotMessage(
-      response.text,
-      {
-        widget: "options",
-        payload: {
-          recommendProducts: JSON.parse(response['recommend_products']),
-          originalMessage: message
-        }
-      }
-    );
+    const botMessage = this.createChatBotMessage(response.text, {
+      widget: "options",
+      payload: {
+        recommendProducts: JSON.parse(response["recommend_products"]),
+        originalMessage: message,
+      },
+    });
     this.addMessageToState(botMessage);
   };
 

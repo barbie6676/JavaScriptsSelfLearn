@@ -6,6 +6,8 @@ import pandas as pd
 from enum import Enum
 import backoff
 import time
+import ast
+
 
 class Role(Enum):
     system = 1
@@ -35,93 +37,36 @@ def create_embedding_with_backoff(**kwargs):
 
 
 attribute_keys = [
-    "prod_id",
-    "prod",
-    "brand",
+    "snap_product_id",
+    "title",
     "description",
-    "url",
-    "image_url"
+    "link",
+    "image_link",
+    "google_product_category",
+    "product_type",
+    "brand",
+    "gender",
 ]
 
-product_data = [{
-    "prod_id": 1,
-    "prod": "moisturizer",
-    "brand": "Aveeno",
-    "description": "for dry skin",
-    "url": "https://www.aveeno.com/products/moisturizing-lotion-for-very-dry-skin",
-    "image_url": "https://www.aveeno.com/sites/aveeno_us_2/files/styles/jjbos_adaptive_images_generic-tablet/public/product-images/ave_381371182176_us_skin_relief_moisturizing_lotion_fragrance_free_33oz_00015-min.png"
-},
-    {
-    "prod_id": 2,
-    "prod": "foundation",
-    "brand": "Maybelline",
-    "description": "medium coverage",
-    "url": "https://www.amazon.com/Maybelline-Poreless-Foundation-Natural-Oil-Free/dp/B00PFCSURS/ref=asc_df_B00PFCSURS/?tag=hyprod-20&linkCode=df0&hvadid=312127951361&hvpos=&hvnetw=g&hvrand=14075047475504352054&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9031934&hvtargid=pla-360157827499&psc=1",
-    "image_url": "https://m.media-amazon.com/images/I/71v7ECrH7lS._SX679_.jpg"
-},
-    {
-    "prod_id": 3,
-    "prod": "moisturizer",
-    "brand": "CeraVe",
-    "description": "for dry skin",
-    "url": "https://www.cerave.com/skincare/moisturizers/moisturizing-cream",
-    "image_url": "https://www.cerave.com/-/media/project/loreal/brand-sites/cerave/americas/us/products-v4/moisturizing-cream/cerave_moisturizing_cream_16oz_jar_front-700x875-v3.jpg?rev=8bd2516ca01e42328ae905e2e312709e?w=500&hash=BEB029F78EBCDB5C9DFC1B778B97B1BE"
-},
-    {
-    "prod_id": 4,
-    "prod": "nail polish",
-    "brand": "OPI",
-    "description": "raspberry red",
-    "url": "https://www.amazon.com/s?k=opi+raspberry+nail+polish&hvadid=177545499339&hvdev=c&hvlocphy=9031934&hvnetw=g&hvqmt=e&hvrand=12899016763763224639&hvtargid=kwd-42288850862&hydadcr=22033_9708579&tag=googhydr-20&ref=pd_sl_28m8rz4iy7_e",
-    "image_url": "https://m.media-amazon.com/images/I/61F0LNrjufL._AC_UL800_FMwebp_QL65_.jpg"
-},
-    {
-    "prod_id": 5,
-    "prod": "concealer",
-    "brand": "Chanel",
-    "description": "medium coverage",
-    "url": "https://www.chanel.com/us/makeup/face/c/5x1x6x36/concealer/",
-    "image_url": "https://puls-img.chanel.com/c_limit,w_3200/q_auto:best,dpr_auto,f_auto/1662565558090-correcteursmakeupplpdesktopwebp_720x2304.webp"
-},
-    {
-    "prod_id": 6,
-    "prod": "moisturizer",
-    "brand": "Ole Henkrisen",
-    "description": "for oily skin",
-    "url": "https://olehenriksen.com/collections/moisturizer/products/strength-trainer-peptide-boost-moisturizer",
-    "image_url": "https://cdn.shopify.com/s/files/1/0615/7785/5148/products/ST_SILO_01_1_1600x.jpg?v=1679593092"
-},
-    {
-    "prod_id": 7,
-    "prod": "moisturizer",
-    "brand": "CeraVe",
-    "description": "for normal to dry skin",
-    "url": "https://www.cerave.com/skincare/dry-skin",
-    "image_url": "https://www.cerave.com/-/media/project/loreal/brand-sites/cerave/americas/us/products-v4/moisturizing-cream/cerave_moisturizing_cream_16oz_jar_front-700x875-v3.jpg?rev=8bd2516ca01e42328ae905e2e312709e?w=500&hash=BEB029F78EBCDB5C9DFC1B778B97B1BE"
-},
-    {
-    "prod_id": 8,
-    "prod": "moisturizer",
-    "brand": "First Aid Beauty",
-    "description": "for dry skin",
-    "url": "https://www.firstaidbeauty.com/skin-care-products/moisturizers/ultra-repair-face-moisturizer",
-    "image_url": "https://cdn11.bigcommerce.com/s-65cfp7jfhx/images/stencil/960w/products/127/3294/1._LEAD_RENDERING__49457.1645198838.jpg?c=1%20960w"
-}, {
-    "prod_id": 9,
-    "prod": "makeup sponge",
-    "brand": "Sephora",
-    "description": "super-soft, exclusive, latex-free foam",
-    "url": "https://www.sephora.com/product/beautyblender-P228913",
-    "image_url": "https://www.sephora.com/productimages/sku/s2230829-main-zoom.jpg?imwidth=315"
-}]
+# Lucy Catalog
+# SELECT * FROM `snapchat-pcs-prod.v1.products_20230427`
+# where catalog_id='6aada195-bba1-4ad5-8e1e-d88dc9ad7cec'
 
-get_embedding_start_time = time.time()
-product_data_df = pd.DataFrame(product_data)
-product_data_df['combined'] = product_data_df.apply(
-    lambda row: f"{row['brand']}, {row['prod']}, {row['description']}", axis=1)
-product_data_df['text_embedding'] = product_data_df.combined.apply(
-    lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
-print("get_embedding: " + str(time.time() - get_embedding_start_time))
+# Uncomment if you use a new catalog
+# get_embedding_start_time = time.time()
+# product_data_df = pd.read_csv('lucy_catalog.csv')
+# product_data_df['combined'] = product_data_df.apply(
+#     lambda row: f"{row['title']}, {row['description']}, {row['google_product_category']}, {row['product_type']}, {row['brand']}, {row['gender']}", axis=1)
+# product_data_df['text_embedding'] = product_data_df.combined.apply(
+#     lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
+# product_data_df.to_csv('example.csv', index=False)
+# print("get_embedding: " + str(time.time() - get_embedding_start_time))
+
+# comment if you use a new catalog
+product_data_df = pd.read_csv('example.csv')
+product_data_df['text_embedding'] = product_data_df['text_embedding'].apply(
+    ast.literal_eval)
+
 
 @app.route("/", methods=["GET"])
 def home():
@@ -152,7 +97,8 @@ def recommend_product():
             lambda x: cosine_similarity(x, embeddings_customer_question))
         product_data_df = product_data_df.sort_values(
             'search_products', ascending=False)
-        print("cosine_similarity: " + str(time.time() - cosine_similarity_start_time))
+        print("cosine_similarity: " +
+              str(time.time() - cosine_similarity_start_time))
 
         top_3_products_df = product_data_df.head(3)
 

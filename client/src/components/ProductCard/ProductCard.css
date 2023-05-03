@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 4px;
+  border-radius: 10px;
+  width: 30%;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+}
+
+.image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.image img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+}
+
+.description {
+  line-height: 20px;
+  font-size: 11px;
+}
+
+.description p {
+  font-size: 11px;
+}
