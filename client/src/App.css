@@ -8,9 +8,9 @@
 }
 
 .react-chatbot-kit-chat-container {
-  width: 800px;
+  width: 800px !important;
 }
 
 .react-chatbot-kit-chat-bot-message {
-  width: 100%;
+  width: 100% !important;
 }
