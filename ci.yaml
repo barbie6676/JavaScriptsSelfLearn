@@ -1,0 +1,11 @@
+version: 1
+on:
+  push: # extend below section if you have more builds
+    - branches: ['release-production']
+      workflows:
+        - workflow_type: backend_workflow
+          build_name: production
+
+machamp:
+  releases:
+    - branch_name: ^release-production$

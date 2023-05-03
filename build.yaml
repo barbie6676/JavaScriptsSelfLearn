@@ -1,0 +1,13 @@
+version: 1
+machamp:
+  production:
+    tag_template: 0.0.%build.counter%
+    update_ghe: true
+    build_cache: false
+    git_cache: false
+    steps:
+      dockerize:
+        type: docker
+        dockerfile: Dockerfile
+        image_name: stylebot
+        workspace_context: ./
