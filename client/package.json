@@ -9,7 +9,7 @@
     "@testing-library/user-event": "^7.1.2",
     "axios": "^1.4.0",
     "react": "^16.13.1",
-    "react-chatbot-kit": "^1.0.5",
+    "react-chatbot-kit": "^2.1.2",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "react-util-kit": "^0.0.14",
