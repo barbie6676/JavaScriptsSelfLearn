@@ -72,6 +72,9 @@ product_data_df['text_embedding'] = product_data_df['text_embedding'].apply(
 # we didn't clear any thing yet in-memory
 message_objects_map = {}
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify(success=True)
 
 @app.route("/recommend-product", methods=["POST"])
 def recommend_product():
