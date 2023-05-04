@@ -22,7 +22,7 @@ spec:
         eks.amazonaws.com/nodegroup: demo
       containers:
         - name: main-container
-          image: 634038559948.dkr.ecr.us-west-2.amazonaws.com/snapchat/ares-stylebot/production/stylebot:0.0.4
+          image: 634038559948.dkr.ecr.us-west-2.amazonaws.com/snapchat/ares-stylebot/production/stylebot
           imagePullPolicy: Always
           ports:
           - name: app
