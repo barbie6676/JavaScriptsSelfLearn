@@ -6,7 +6,11 @@ machamp:
     build_cache: false
     git_cache: false
     steps:
+      deploy_yaml:
+        type: cmd
+        command: gsutil cp production.yaml gs://forma-gateway/production.yaml
       dockerize:
+        parent: deploy_yaml
         type: docker
         dockerfile: Dockerfile
         image_name: stylebot

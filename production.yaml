@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stylebot
+  namespace: gateway-production
+spec:
+  selector:
+    matchLabels:
+      app: stylebot
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        app: stylebot
+    spec:
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: demo
+      containers:
+        - name: main-container
+          image: 634038559948.dkr.ecr.us-west-2.amazonaws.com/snapchat/ares-stylebot/production/stylebot
+          imagePullPolicy: Always
+          ports:
+          - name: app
+            containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/hello
+              port: app
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/hello
+              port: app
+            initialDelaySeconds: 30
+            periodSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-production-lb
+  namespace: gateway-production
+  annotations:
+    # find the arn in here:
+    # https://us-west-2.console.aws.amazon.com/acm/home?region=us-west-2#/
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-west-2:187318412492:certificate/b1bf2c64-c0bb-4b7f-b723-981b2cb74ee0
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "120"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 443
+    targetPort: app
+    name: https
+  selector:
+    app: gateway
