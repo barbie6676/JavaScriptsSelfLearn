@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  // baseURL: "http://127.0.0.1:80/server/",
+  // baseURL: "http://127.0.0.1:5000/server/",
   baseURL: "https://stylebot.tryforma.com/server/",
   headers: {
     "Content-Type": "application/json",

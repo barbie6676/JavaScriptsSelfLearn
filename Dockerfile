@@ -31,8 +31,8 @@ COPY server/nginx.conf /etc/nginx/sites-enabled/
 COPY --from=build-stage /client/build /app/statics
 COPY server /app
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 5000
+EXPOSE 5000
 
 # Run Nginx and Flask server
 CMD ["bash", "-c", "nginx && python app.py"]
