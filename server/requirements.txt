@@ -1,10 +1,13 @@
 Flask==2.3.1
 Flask-Cors==3.0.10
+Flask-SSE==1.0.0
 openai==0.27.5
 matplotlib==3.7.1
 pandas==2.0.1
 backoff==2.2.1
 plotly==5.14.1
+redis==4.5.4
+gunicorn==20.1.0
 
 scipy==1.10.1
 scikit-learn==1.2.2

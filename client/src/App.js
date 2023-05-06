@@ -1,6 +1,6 @@
 import React from "react";
 import Chatbot from "react-chatbot-kit";
-import 'react-chatbot-kit/build/main.css'
+import "react-chatbot-kit/build/main.css";
 
 import config from "./chatbot/config";
 import ActionProvider from "./chatbot/ActionProvider";
@@ -16,6 +16,7 @@ function App() {
           config={config}
           actionProvider={ActionProvider}
           messageParser={MessageParser}
+          disableScrollToBottom={true}
         />
       </div>
     </div>

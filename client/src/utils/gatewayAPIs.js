@@ -1,8 +1,10 @@
 import axios from "axios";
 
+const baseURL = "http://127.0.0.1:5000/";
+// const baseURL = "https://stylebot.tryforma.com/server/";
+
 const axiosInstance = axios.create({
-  // baseURL: "http://127.0.0.1:5000/server/",
-  baseURL: "https://stylebot.tryforma.com/server/",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,14 +14,19 @@ const axiosInstance = axios.create({
   },
 });
 
-export const getRecommendProducts = async (customerInput, sessionId) => {
+export const recommendProductsStream = () => {
+  return new EventSource(baseURL + "stream");
+};
+
+export const startRecommendProducts = (customerInput, sessionId) => {
   try {
-    const res = await axiosInstance.post(`recommend-product`, {
-      customer_input: customerInput,
-      session_id: sessionId,
+    axiosInstance.get(`recommend-product`, {
+      params: {
+        customer_input: customerInput,
+        session_id: sessionId,
+      },
     });
-    return res.data;
   } catch (ex) {
-    console.error("failed to get recommended product");
+    console.error("failed to get recommended product " + ex);
   }
 };

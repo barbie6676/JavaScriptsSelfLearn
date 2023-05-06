@@ -1,12 +1,12 @@
 import openai
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 from openai.embeddings_utils import get_embedding, cosine_similarity
 import pandas as pd
 from enum import Enum
 import backoff
 import time
 import ast
+from flask_sse import sse
 
 
 class Role(Enum):
@@ -16,8 +16,8 @@ class Role(Enum):
 
 
 app = Flask(__name__)
-CORS(app)
-
+app.config["REDIS_URL"] = "redis://localhost"
+app.register_blueprint(sse, url_prefix='/stream')
 openai.api_key = "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"
 
 
@@ -72,16 +72,17 @@ product_data_df['text_embedding'] = product_data_df['text_embedding'].apply(
 # we didn't clear any thing yet in-memory
 message_objects_map = {}
 
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify(success=True)
 
-@app.route("/recommend-product", methods=["POST"])
+
+@app.route("/recommend-product", methods=["GET"])
 def recommend_product():
-    data = request.get_json()
     # example: "Hi! Can you recommend a good moisturizer for me?"
-    customer_input = data.get("customer_input")
-    session_id = data.get("session_id")
+    customer_input = request.args.get('customer_input')
+    session_id = request.args.get('session_id')
 
     if not customer_input:
         return jsonify({"error": "Please provide a prompt"}), 400
@@ -106,6 +107,8 @@ def recommend_product():
               str(time.time() - cosine_similarity_start_time))
 
         top_3_products_df = product_data_df.head(3)
+        sse.publish({'recommend_products': top_3_products_df[attribute_keys].to_json(
+            orient="records")}, type="recommend")
 
         message_objects = []
         if session_id:
@@ -138,13 +141,25 @@ def recommend_product():
         chat_completion_start_time = time.time()
         response = chat_completion_with_backoff(
             model="gpt-3.5-turbo",
-            messages=message_objects
+            messages=message_objects,
+            stream=True
         )
-        generated_text = response.choices[0].message['content'].strip()
+        for chunk in response:
+            chunk_message = chunk['choices'][0]['delta']
+            sse.publish({'text': chunk_message}, type="text")
         print("chat_completion: " + str(time.time() - chat_completion_start_time))
-        return jsonify({"text": generated_text, "recommend_products": top_3_products_df[attribute_keys].to_json(orient="records")})
+        return jsonify(success=True), 200
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
+
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 
 if __name__ == "__main__":
