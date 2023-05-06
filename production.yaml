@@ -29,14 +29,14 @@ spec:
             containerPort: 5000
           livenessProbe:
             httpGet:
-              path: /server/health
+              path: /health
               port: app
             initialDelaySeconds: 20
             periodSeconds: 30
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /server/health
+              path: /health
               port: app
             initialDelaySeconds: 30
             periodSeconds: 2
