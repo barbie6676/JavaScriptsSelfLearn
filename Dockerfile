@@ -13,13 +13,13 @@ COPY ./client .
 
 RUN npm run build
 
-# Stage 2: Set up Python, Flask, and Nginect
+# Stage 2: Set up Python, Flask, Redis and Nginect
 FROM python:3.10-bullseye
 
 WORKDIR /app
 
 # Install Nginx and required Python packages
-RUN apt-get update && apt-get install -y nginx
+RUN apt-get update && apt-get install -y nginx redis
 COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -31,8 +31,12 @@ COPY server/nginx.conf /etc/nginx/sites-enabled/
 COPY --from=build-stage /client/build /app/statics
 COPY server /app
 
-# Expose port 5000
+# Expose ports 5000 and 6379
 EXPOSE 5000
+EXPOSE 6379
+
+# Run Redis server
+CMD ["redis-server"]
 
 # Run Nginx and Flask server
 CMD ["bash", "-c", "nginx && python app.py"]
