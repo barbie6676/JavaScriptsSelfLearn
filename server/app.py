@@ -84,6 +84,9 @@ def recommend_product():
     customer_input = request.args.get('customer_input')
     session_id = request.args.get('session_id')
 
+    if not session_id:
+        return jsonify({"error": "Please provide a session_id"}), 400
+    
     if not customer_input:
         return jsonify({"error": "Please provide a prompt"}), 400
 
@@ -108,7 +111,7 @@ def recommend_product():
 
         top_3_products_df = product_data_df.head(3)
         sse.publish({'recommend_products': top_3_products_df[attribute_keys].to_json(
-            orient="records")}, type="recommend")
+            orient="records")}, type="recommend", channel=session_id)
 
         message_objects = []
         if session_id:
@@ -146,7 +149,7 @@ def recommend_product():
         )
         for chunk in response:
             chunk_message = chunk['choices'][0]['delta']
-            sse.publish({'text': chunk_message}, type="text")
+            sse.publish({'text': chunk_message}, type="text", channel=session_id)
         print("chat_completion: " + str(time.time() - chat_completion_start_time))
         return jsonify(success=True), 200
     except Exception as e:

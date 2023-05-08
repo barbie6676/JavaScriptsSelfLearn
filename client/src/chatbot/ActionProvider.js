@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { createClientMessage } from "react-chatbot-kit";
 import { startRecommendProducts, recommendProductsStream } from "../utils/gatewayAPIs";
+import config from "../chatbot/config";
 
 const ActionProvider = ({ createChatBotMessage, setState, children }) => {
   useEffect(() => {
-    const sse = recommendProductsStream();
+    const sse = recommendProductsStream(config.state.sessionId);
 
     sse.addEventListener(
       "recommend",

@@ -16,8 +16,8 @@ const axiosInstance = axios.create({
   },
 });
 
-export const recommendProductsStream = () => {
-  return new EventSource(streamURL + "stream");
+export const recommendProductsStream = (sessionId) => {
+  return new EventSource(streamURL + "stream?channel=" + sessionId);
 };
 
 export const startRecommendProducts = (customerInput, sessionId) => {
