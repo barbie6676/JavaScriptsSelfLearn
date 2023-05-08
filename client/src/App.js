@@ -16,7 +16,6 @@ function App() {
           config={config}
           actionProvider={ActionProvider}
           messageParser={MessageParser}
-          disableScrollToBottom={true}
         />
       </div>
     </div>
