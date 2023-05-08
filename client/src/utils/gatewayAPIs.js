@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const baseURL = "http://127.0.0.1:5000/";
-const baseURL = "https://stylebot.tryforma.com/";
+const baseURL = "https://stylebot.tryforma.com/server/";
 
 const axiosInstance = axios.create({
   baseURL,
@@ -20,7 +20,7 @@ export const recommendProductsStream = () => {
 
 export const startRecommendProducts = (customerInput, sessionId) => {
   try {
-    axiosInstance.get(`server/recommend-product`, {
+    axiosInstance.get(`recommend-product`, {
       params: {
         customer_input: customerInput,
         session_id: sessionId,
