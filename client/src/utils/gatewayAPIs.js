@@ -1,7 +1,9 @@
 import axios from "axios";
 
 // const baseURL = "http://127.0.0.1:5000/";
+// const streamURL = "http://127.0.0.1:5000/";
 const baseURL = "https://stylebot.tryforma.com/server/";
+const streamURL = "https://stylebot.tryforma.com/stream/";
 
 const axiosInstance = axios.create({
   baseURL,
@@ -15,7 +17,7 @@ const axiosInstance = axios.create({
 });
 
 export const recommendProductsStream = () => {
-  return new EventSource(baseURL + "stream");
+  return new EventSource(streamURL + "stream");
 };
 
 export const startRecommendProducts = (customerInput, sessionId) => {
