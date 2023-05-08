@@ -20,7 +20,7 @@ export const recommendProductsStream = () => {
 
 export const startRecommendProducts = (customerInput, sessionId) => {
   try {
-    axiosInstance.get(`recommend-product`, {
+    axiosInstance.get(`server/recommend-product`, {
       params: {
         customer_input: customerInput,
         session_id: sessionId,
