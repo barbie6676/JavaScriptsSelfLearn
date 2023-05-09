@@ -46,6 +46,8 @@ attribute_keys = [
     "product_type",
     "brand",
     "gender",
+    "sale_price_micro_amount",
+    "sale_price_currency"
 ]
 
 # Lucy Catalog
