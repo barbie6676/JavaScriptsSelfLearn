@@ -20,9 +20,9 @@ export const recommendProductsStream = (sessionId) => {
   return new EventSource(streamURL + "stream?channel=" + sessionId);
 };
 
-export const startRecommendProducts = (customerInput, sessionId) => {
+export const startRecommendProducts = async (customerInput, sessionId) => {
   try {
-    axiosInstance.get(`recommend-product`, {
+    await axiosInstance.get(`recommend-product`, {
       params: {
         customer_input: customerInput,
         session_id: sessionId,

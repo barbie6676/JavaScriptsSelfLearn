@@ -71,7 +71,10 @@ const ActionProvider = ({ createChatBotMessage, setState, children }) => {
         messages: [...prevState.messages, clientMessage],
       }));
     }
-    startRecommendProducts(message, sessionId);
+    const element = document.querySelector('.react-chatbot-kit-chat-input-container');
+    element.style.pointerEvents = 'none'; // disable pointer events
+    await startRecommendProducts(message, sessionId);
+    element.style.pointerEvents = 'auto'; // enable pointer events
   };
 
   return (
