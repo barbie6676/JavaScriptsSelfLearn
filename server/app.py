@@ -7,6 +7,7 @@ import backoff
 import time
 import ast
 from flask_sse import sse
+from babel.numbers import format_currency
 
 
 class Role(Enum):
@@ -88,13 +89,23 @@ def recommend_product():
 
     if not session_id:
         return jsonify({"error": "Please provide a session_id"}), 400
-    
+
     if not customer_input:
         return jsonify({"error": "Please provide a prompt"}), 400
 
     try:
         global product_data_df
         global message_objects_map
+
+        def format_price(sale_price_micro_amount, sale_price_currency):
+            price = sale_price_micro_amount / 1000000
+            formatted_price = format_currency(price, sale_price_currency, locale='en_US')
+            return formatted_price
+
+        product_data_df['formatted_price'] = product_data_df.apply(lambda row: format_price(
+            row['sale_price_micro_amount'], row['sale_price_currency']), axis=1)
+        product_data_df['chat_combined'] = product_data_df.apply(
+            lambda row: f"{row['title']}, {row['description']}, {row['google_product_category']}, {row['product_type']}, {row['brand']}, {row['gender']}, {row['formatted_price']}", axis=1)
         create_embedding_start_time = time.time()
         response = create_embedding_with_backoff(
             input=customer_input,
@@ -111,8 +122,9 @@ def recommend_product():
         print("cosine_similarity: " +
               str(time.time() - cosine_similarity_start_time))
 
-        top_3_products_df = product_data_df.head(3)
-        sse.publish({'recommend_products': top_3_products_df[attribute_keys].to_json(
+        top_2_products_df = product_data_df.drop_duplicates(
+            subset=["title"]).head(2)
+        sse.publish({'recommend_products': top_2_products_df[attribute_keys].to_json(
             orient="records")}, type="recommend", channel=session_id)
 
         message_objects = []
@@ -132,11 +144,11 @@ def recommend_product():
         append_message_objects(
             Role.user.name, "Please be friendly and talk to me like a person, don't just give me a list of recommendations")
         append_message_objects(Role.assistant.name,
-                               "I found these 3 products I would recommend")
+                               "I found these 2 products I would recommend")
         products_list = []
-        for index, row in top_3_products_df.iterrows():
+        for index, row in top_2_products_df.iterrows():
             brand_dict = {'role': Role.assistant.name,
-                          "content": f"{row['combined']}"}
+                          "content": f"{row['chat_combined']}"}
             products_list.append(brand_dict)
 
         message_objects.extend(products_list)
@@ -151,7 +163,8 @@ def recommend_product():
         )
         for chunk in response:
             chunk_message = chunk['choices'][0]['delta']
-            sse.publish({'text': chunk_message}, type="text", channel=session_id)
+            sse.publish({'text': chunk_message},
+                        type="text", channel=session_id)
         print("chat_completion: " + str(time.time() - chat_completion_start_time))
         return jsonify(success=True), 200
     except Exception as e:

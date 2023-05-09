@@ -16,7 +16,7 @@ const Options = (props) => {
       id: 1,
     },
     {
-      text: "Try On",
+      text: "Export",
       handler: () => {},
       id: 2,
     },

@@ -1,9 +1,9 @@
 import axios from "axios";
 
-// const baseURL = "http://127.0.0.1:5000/";
-// const streamURL = "http://127.0.0.1:5000/";
-const baseURL = "https://stylebot.tryforma.com/server/";
-const streamURL = "https://stylebot.tryforma.com/stream/";
+const baseURL = "http://127.0.0.1:5000/";
+const streamURL = "http://127.0.0.1:5000/";
+// const baseURL = "https://stylebot.tryforma.com/server/";
+// const streamURL = "https://stylebot.tryforma.com/stream/";
 
 const axiosInstance = axios.create({
   baseURL,
