@@ -19,7 +19,7 @@ FROM python:3.10-bullseye
 WORKDIR /app
 
 # Install Nginx and required Python packages
-RUN apt-get update && apt-get install -y nginx
+RUN apt-get update && apt-get install -y nginx && apt-get install wkhtmltopdf
 COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

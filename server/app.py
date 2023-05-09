@@ -1,5 +1,5 @@
 import openai
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from openai.embeddings_utils import get_embedding, cosine_similarity
 import pandas as pd
 from enum import Enum
@@ -8,6 +8,8 @@ import time
 import ast
 from flask_sse import sse
 from babel.numbers import format_currency
+import pdfkit
+import io
 
 
 class Role(Enum):
@@ -99,7 +101,8 @@ def recommend_product():
 
         def format_price(sale_price_micro_amount, sale_price_currency):
             price = sale_price_micro_amount / 1000000
-            formatted_price = format_currency(price, sale_price_currency, locale='en_US')
+            formatted_price = format_currency(
+                price, sale_price_currency, locale='en_US')
             return formatted_price
 
         product_data_df['formatted_price'] = product_data_df.apply(lambda row: format_price(
@@ -170,6 +173,16 @@ def recommend_product():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/generate-pdf', methods=['POST'])
+def generate_pdf():
+    html = request.json['html']
+    pdf = pdfkit.from_string(html, False)
+
+    buffer = io.BytesIO(pdf)
+    buffer.seek(0)
+    return send_file(buffer, mimetype='application/pdf', as_attachment=True, download_name='output.pdf')
 
 
 @app.after_request

@@ -32,3 +32,22 @@ export const startRecommendProducts = async (customerInput, sessionId) => {
     console.error("failed to get recommended product " + ex);
   }
 };
+
+export const generatePdf = async (innerHTML) => {
+  try {
+    const response = await axiosInstance.post(
+      `generate-pdf`,
+      { html: innerHTML },
+      { responseType: "blob" }
+    );
+    const blob = response.data;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "output.pdf";
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (ex) {
+    console.error("Failed to generate PDF " + ex);
+  }
+};

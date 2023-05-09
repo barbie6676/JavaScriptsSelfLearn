@@ -2,6 +2,17 @@ import React from "react";
 
 import "./Options.css";
 import ProductCard from "../ProductCard/ProductCard";
+import { generatePdf } from "../../utils/gatewayAPIs";
+
+async function sendHTMLtoServer(button) {
+  if (button.classList.contains('option-button__text')) {
+    button = button.parentNode;
+  }
+  button.classList.add("option-button--loading");
+  const innerHTML = document.querySelector('.react-chatbot-kit-chat-message-container').innerHTML;
+  await generatePdf(innerHTML);
+  button.classList.remove("option-button--loading");
+}
 
 const Options = (props) => {
   const sessionId = props.sessionId;
@@ -17,14 +28,16 @@ const Options = (props) => {
     },
     {
       text: "Export",
-      handler: () => {},
+      handler: (event) => {
+        sendHTMLtoServer(event.target)
+      },
       id: 2,
     },
   ];
 
   const buttonsMarkup = options.map((option) => (
     <button key={option.id} onClick={option.handler} className="option-button">
-      {option.text}
+      <span className="option-button__text">{option.text}</span>
     </button>
   ));
 
