@@ -58,17 +58,17 @@ attribute_keys = [
 # where catalog_id='6aada195-bba1-4ad5-8e1e-d88dc9ad7cec'
 
 # Uncomment if you use a new catalog
-# get_embedding_start_time = time.time()
-# product_data_df = pd.read_csv('lucy_catalog.csv')
-# product_data_df['combined'] = product_data_df.apply(
-#     lambda row: f"{row['title']}, {row['description']}, {row['google_product_category']}, {row['product_type']}, {row['brand']}, {row['gender']}", axis=1)
-# product_data_df['text_embedding'] = product_data_df.combined.apply(
-#     lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
-# product_data_df.to_csv('example.csv', index=False)
-# print("get_embedding: " + str(time.time() - get_embedding_start_time))
+get_embedding_start_time = time.time()
+product_data_df = pd.read_csv('lucy_catalog.csv')
+product_data_df['combined'] = product_data_df.apply(
+    lambda row: f"{row['title']}, {row['description']}, {row['google_product_category']}, {row['product_type']}, {row['brand']}, {row['gender']}", axis=1)
+product_data_df['text_embedding'] = product_data_df.combined.apply(
+    lambda x: get_embedding_with_backoff(text=x, engine='text-embedding-ada-002'))
+product_data_df.to_csv('example.csv', index=False)
+print("get_embedding: " + str(time.time() - get_embedding_start_time))
 
 # comment if you use a new catalog
-product_data_df = pd.read_csv('example.csv')
+#product_data_df = pd.read_csv('example.csv')
 product_data_df['text_embedding'] = product_data_df['text_embedding'].apply(
     ast.literal_eval)
 
